@@ -1,2 +1,10 @@
 # stock-analysis
 I am building a Python stock screener that ranks stocks using financial, technical, risk, dividend, momentum and news data. It fetches free news, filters irrelevant articles, uses no-news-neutral scoring, and exports rankings, warnings, backtests and news sheets to Excel/CSV.
+
+I am building an advanced Python-based stock screener and portfolio analysis tool called a “stock calculator.” The goal is to create a lightweight hedge-fund-style system that can analyze a large list of stocks, score them using multiple financial and technical factors, and rank them from strongest to weakest.
+
+The program uses data from yfinance to collect stock prices, fundamentals, volume, market cap, sector information, and historical performance. It calculates several factor scores, including value, quality, growth, risk, stability, dividend strength, momentum, and drawdown. These scores are combined into a total quant score, which can change depending on the selected strategy mode, such as aggressive, balanced, conservative, or dividend-focused.
+
+A major part of the project is the news module. The tool fetches free news per ticker using sources like yfinance news and Google News RSS. It then filters the news to avoid irrelevant or low-quality articles, checks whether the article is really about the company, scores sentiment, detects important news categories, and calculates a NewsScore. In version V12.3, we are improving the system so that no news does not unfairly lower a good stock’s score. Instead, news only affects the final score when it is relevant and reliable enough, using NewsConfidence, EffectiveNewsWeight, and NewsStatus.
+
+The program exports results to Excel and CSV files in a dedicated results folder. The output includes the stock ranking, final score, quant score, news score, warnings, backtest results, portfolio weights, equity curves, and detailed news sheets. The long-term goal is to turn this into a powerful stock research system with better data, historical snapshots, alerts, portfolio monitoring, a visual dashboard, and eventually machine learning predictions.
