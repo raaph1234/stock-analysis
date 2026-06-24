@@ -1,0 +1,419 @@
+# Hedge Fund Lite V12.3 — Stock Screener & Backtester
+
+Hedge Fund Lite V12.3 is a single-file Python stock screener and backtester.
+It downloads stock data with `yfinance`, calculates quant scores, checks recent news, ranks stocks, runs a basic backtest, and exports the results to Excel.
+
+> This project is for educational and research purposes only. It is not financial advice.
+
+---
+
+## Features
+
+* Interactive ticker input if no tickers are given
+* CSV watchlist support
+* Stock data fetching with `yfinance`
+* Local cache for downloaded data
+* Multi-factor scoring:
+
+  * Value
+  * Quality
+  * Growth
+  * Risk
+  * Stability
+  * Dividend
+  * Momentum
+  * Drawdown
+* Confidence-adjusted scoring
+* Market cap and volume filters
+* News scoring with relevance, source quality, sentiment, and clickbait filtering
+* No-news-neutral logic: no news does not lower the final score
+* Portfolio optimization:
+
+  * Sharpe
+  * Minimum variance
+  * Risk parity
+* Optional GPU covariance calculation with CuPy
+* Excel output with multiple sheets
+
+---
+
+## Requirements
+
+You need:
+
+* Python 3.10 or newer
+* Internet connection
+* A terminal / command prompt
+* Git, optional but recommended
+* Excel, LibreOffice, or another program that can open `.xlsx` files
+
+---
+
+## Installation from Scratch
+
+### 1. Download the repository
+
+Using Git:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
+cd YOUR_REPOSITORY_NAME
+```
+
+Or download the ZIP from GitHub and extract it.
+
+---
+
+### 2. Create a virtual environment
+
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+Windows Command Prompt:
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+```
+
+macOS / Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+---
+
+### 3. Install the required libraries
+
+```bash
+pip install yfinance pandas numpy scipy scikit-learn openpyxl feedparser vaderSentiment
+```
+
+Optional GPU support:
+
+```bash
+pip install cupy-cuda12x
+```
+
+Only install CuPy if you know your system supports CUDA and you want to use the `--gpu` option.
+
+---
+
+## Folder Structure
+
+Recommended project structure:
+
+```txt
+project-folder/
+│
+├── stock_screener_v12_3.py
+├── README.md
+├── requirements.txt
+├── watchlist.csv              optional
+│
+├── cache/                     created automatically
+└── results/                   used for Excel output
+```
+
+### Do you need to create folders yourself?
+
+Usually:
+
+* `cache/` is created automatically by the script.
+* `results/` should exist or be created automatically depending on the script version.
+* To avoid errors, you can manually create `results/` yourself before running:
+
+Windows:
+
+```powershell
+mkdir results
+```
+
+macOS / Linux:
+
+```bash
+mkdir -p results
+```
+
+---
+
+## Create a requirements.txt file
+
+Add this to `requirements.txt`:
+
+```txt
+yfinance
+pandas
+numpy
+scipy
+scikit-learn
+openpyxl
+feedparser
+vaderSentiment
+```
+
+Optional GPU dependency:
+
+```txt
+cupy-cuda12x
+```
+
+It is better not to include `cupy-cuda12x` in the normal requirements file unless GPU support is required.
+
+Then users can install everything with:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Basic Usage
+
+Run the script:
+
+```bash
+python stock_screener_v12_3.py
+```
+
+If you do not provide tickers, the script will ask for tickers interactively.
+
+Example with tickers:
+
+```bash
+python stock_screener_v12_3.py --tickers AAPL,MSFT,NVDA --mode balanced --objective sharpe --top-n 3
+```
+
+Example with a watchlist file:
+
+```bash
+python stock_screener_v12_3.py --watchlist watchlist.csv
+```
+
+---
+
+## Watchlist CSV Format
+
+You can create a `watchlist.csv` file.
+
+Recommended format:
+
+```csv
+Ticker
+AAPL
+MSFT
+NVDA
+ASML
+PLTR
+```
+
+The script also supports a lowercase `ticker` column or the first column of the CSV file.
+
+---
+
+## Common Commands
+
+Balanced mode:
+
+```bash
+python stock_screener_v12_3.py --tickers AAPL,MSFT,NVDA --mode balanced
+```
+
+Aggressive mode:
+
+```bash
+python stock_screener_v12_3.py --tickers AAPL,NVDA,PLTR --mode aggressive
+```
+
+Conservative mode:
+
+```bash
+python stock_screener_v12_3.py --tickers KO,PG,JNJ,MSFT --mode conservative
+```
+
+Dividend mode:
+
+```bash
+python stock_screener_v12_3.py --tickers KO,PG,JNJ,PEP --mode dividend
+```
+
+Disable news scoring:
+
+```bash
+python stock_screener_v12_3.py --tickers AAPL,MSFT,NVDA --no-news
+```
+
+Use more workers for faster data fetching:
+
+```bash
+python stock_screener_v12_3.py --tickers AAPL,MSFT,NVDA,ASML,PLTR --workers 4
+```
+
+Use GPU mode:
+
+```bash
+python stock_screener_v12_3.py --tickers AAPL,MSFT,NVDA --gpu
+```
+
+---
+
+## Main Options
+
+| Option             | Meaning                                                             |
+| ------------------ | ------------------------------------------------------------------- |
+| `--tickers`        | Comma-separated list of tickers                                     |
+| `--watchlist`      | CSV file with tickers                                               |
+| `--mode`           | Strategy mode: `aggressive`, `balanced`, `conservative`, `dividend` |
+| `--top-n`          | Number of top stocks to select                                      |
+| `--objective`      | Optimization objective: `sharpe`, `minvar`, `risk_parity`           |
+| `--history-period` | yfinance history period, for example `1y`, `3y`, `5y`               |
+| `--lookback-days`  | Lookback period for scoring                                         |
+| `--min-marketcap`  | Minimum market cap filter                                           |
+| `--min-volume`     | Minimum average volume filter                                       |
+| `--no-news`        | Disable news scoring                                                |
+| `--gpu`            | Use optional GPU covariance calculation                             |
+| `--workers`        | Number of parallel workers                                          |
+
+---
+
+## Output
+
+The script creates an Excel file with multiple sheets, such as:
+
+* `settings`
+* `universe_snapshot`
+* `top_snapshot`
+* `raw_data`
+* `warnings`
+* `equal_metrics`
+* `optimized_metrics`
+* `benchmark_metrics`
+* `comparison`
+* `equal_equity_curve`
+* `opt_equity_curve`
+* `benchmark_equity_curve`
+* `weights`
+
+The output file is saved in the results folder.
+
+---
+
+## Important Notes
+
+### Internet is required
+
+The script uses online data from:
+
+* Yahoo Finance through `yfinance`
+* Google News RSS through `feedparser`
+
+If the internet connection is blocked or slow, some data may be missing.
+
+---
+
+### Some tickers may fail
+
+Not every ticker has complete data.
+If a ticker has missing price data, missing fundamentals, or an invalid symbol, the script may skip it or show a warning.
+
+---
+
+### News scoring is not perfect
+
+The news module tries to filter:
+
+* irrelevant articles
+* general market articles
+* clickbait articles
+* weak ticker matches
+* low-quality sources
+
+However, automated news scoring can still make mistakes.
+
+---
+
+### Backtest limitation
+
+The backtest is mainly quant-based.
+Free historical news data is usually not reliable point-in-time data, so the news score should not be treated as a perfect historical backtest signal.
+
+Also, `yfinance` fundamentals are current snapshots, not true historical point-in-time fundamentals. This can create look-ahead bias.
+
+---
+
+## Troubleshooting
+
+### `ModuleNotFoundError`
+
+Example:
+
+```txt
+ModuleNotFoundError: No module named 'yfinance'
+```
+
+Fix:
+
+```bash
+pip install yfinance pandas numpy scipy scikit-learn openpyxl feedparser vaderSentiment
+```
+
+---
+
+### PowerShell cannot activate virtual environment
+
+If this command fails:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Run:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+Then try again:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+---
+
+### No data for ticker
+
+Possible causes:
+
+* Wrong ticker symbol
+* Ticker not supported by Yahoo Finance
+* Temporary Yahoo Finance issue
+* Internet connection problem
+* Rate limiting
+
+Try fewer tickers first:
+
+```bash
+python stock_screener_v12_3.py --tickers AAPL,MSFT,NVDA
+```
+
+---
+
+### Excel file is open
+
+If the output Excel file is already open, Python may not be able to overwrite it.
+Close the Excel file and run the script again.
+
+---
+
+## Disclaimer
+
+This project is for educational and research purposes only.
+It does not provide financial advice, investment advice, or trading recommendations.
+Always do your own research before making financial decisions.
